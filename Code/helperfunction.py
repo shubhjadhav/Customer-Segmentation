@@ -3,6 +3,11 @@ import os
 import re
 from collections import Counter
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
 
 stop_words = [
     'can', 'its', 'each', 'with', 'their', 'is', 'into',
@@ -110,3 +115,41 @@ def create_embeddings(word_to_id, corpus, embed_dim):
         X.append(one_hot_encoding)
 
     return np.asarray(X)
+
+
+def get_kmeans(X, feature_names, max_clusters, title, plot = True ):
+    
+    X = X[feature_names]
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)  
+    
+    wcss = []
+    silhouette_scores = []
+    all_clusters = []
+
+    for i in range(3, max_clusters):
+        kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+        kmeans.fit(X_scaled)
+
+        wcss.append(kmeans.inertia_)
+        clusters = kmeans.predict(X_scaled)
+        all_clusters.append(clusters)
+        silhouette_avg = silhouette_score(X_scaled, clusters)
+        silhouette_scores.append(round(silhouette_avg, 2))
+
+        print("For n_clusters =", i, "The average silhouette_score is :", round(silhouette_avg,2))
+    
+    if plot: 
+        # Plot the elbow graph to find the optimal number of clusters
+        plt.plot(range(3, max_clusters), wcss)
+        plt.title('Elbow Method for Optimal k')
+        plt.xlabel('Number of Clusters (k)')
+        plt.ylabel('WCSS')
+        plt.show()
+        
+    clusters = int(input("Give best Cluster"))
+    plt.hist(all_clusters[clusters-3], alpha=0.5)
+    plt.title(title)
+    plt.xlabel('Cluster Number')
+    plt.ylabel('count')
+    plt.show()
