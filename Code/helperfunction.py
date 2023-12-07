@@ -147,9 +147,11 @@ def get_kmeans(X, feature_names, max_clusters, title, plot = True ):
         plt.ylabel('WCSS')
         plt.show()
         
-    clusters = int(input("Give best Cluster"))
+    clusters = int(input("Give best Cluster:    "))
     plt.hist(all_clusters[clusters-3], alpha=0.5)
     plt.title(title)
     plt.xlabel('Cluster Number')
     plt.ylabel('count')
     plt.show()
+    
+    return all_clusters[clusters-3]
